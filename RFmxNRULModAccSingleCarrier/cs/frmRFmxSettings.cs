@@ -47,14 +47,26 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
             this.cboDuplex.DataSource = Enum.GetValues(typeof(RFmxDuplexMode));
             this.cboDuplex.SelectedItem = RFmxDuplexMode.FDD;
 
-            this.cboUplinkType.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXLinkDirection));
-            this.cboUplinkType.SelectedItem = RFmx.NRMX.RFmxNRMXLinkDirection.Uplink;
+            this.cboLinkDirection.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXLinkDirection));
+            this.cboLinkDirection.SelectedItem = RFmx.NRMX.RFmxNRMXLinkDirection.Uplink;
 
-            this.cboUplingConfig.DataSource = Enum.GetValues(typeof(RFmxMultiplexing));
-            this.cboUplingConfig.SelectedItem = RFmxMultiplexing.DFTSOFDM;
+            this.cboMiltiplexingScheme.DataSource = Enum.GetValues(typeof(RFmxMultiplexing));
+            this.cboMiltiplexingScheme.SelectedItem = RFmxMultiplexing.DFTSOFDM;
 
             this.cboPUSCHMod.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXPuschModulationType));
             this.cboPUSCHMod.SelectedItem = RFmx.NRMX.RFmxNRMXPuschModulationType.Qam256;
+
+            this.cboDmrsPowerMode.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXPuschDmrsPowerMode));
+            this.cboDmrsPowerMode.SelectedItem = RFmx.NRMX.RFmxNRMXPuschDmrsPowerMode.CdmGroups;
+
+            this.cboDmrsConfigType.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXPuschDmrsConfigurationType));
+            this.cboDmrsConfigType.SelectedItem = RFmx.NRMX.RFmxNRMXPuschDmrsConfigurationType.Type1;
+
+            this.cboDmrsDuration.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXPuschDmrsDuration));
+            this.cboDmrsDuration.SelectedItem = RFmx.NRMX.RFmxNRMXPuschDmrsDuration.SingleSymbol;
+
+            this.cboDmrsMappingType.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXPuschMappingType));
+            this.cboDmrsMappingType.SelectedItem = RFmx.NRMX.RFmxNRMXPuschMappingType.TypeA;
 
             this.cboMeasUnit.DataSource = Enum.GetValues(typeof(RFmx.NRMX.RFmxNRMXModAccMeasurementLengthUnit));
             this.cboMeasUnit.SelectedItem = RFmx.NRMX.RFmxNRMXModAccMeasurementLengthUnit.Slot;
@@ -183,13 +195,13 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
 
                 RFmxOBJ.duplexScheme = (RFmxDuplexMode)this.cboDuplex.SelectedItem;
 
-                RFmxOBJ.lnkDirection = (RFmx.NRMX.RFmxNRMXLinkDirection)this.cboUplinkType.SelectedItem;
+                RFmxOBJ.lnkDirection = (RFmx.NRMX.RFmxNRMXLinkDirection)this.cboLinkDirection.SelectedItem;
 
                 RFmxOBJ.subcarrierSpacing = Convert.ToDouble(this.numSubCarrierSpacing.Value) * 1e3;
                 RFmxOBJ.band = 78;   //Convert.ToInt32(this.numBand.Value);
 
                 //RFmxOBJ.uplinkWaveformType = (RFmx.NRMX.RFmxNRMXUplinkWaveformType)this.cboUplinkType.SelectedItem;
-                RFmxOBJ.puschTransformPrecodingEnabled = (((RFmxMultiplexing)this.cboUplingConfig.SelectedItem == RFmxMultiplexing.DFTSOFDM) ? RFmx.NRMX.RFmxNRMXPuschTransformPrecodingEnabled.True : RFmx.NRMX.RFmxNRMXPuschTransformPrecodingEnabled.False);
+                RFmxOBJ.puschTransformPrecodingEnabled = (((RFmxMultiplexing)this.cboMiltiplexingScheme.SelectedItem == RFmxMultiplexing.DFTSOFDM) ? RFmx.NRMX.RFmxNRMXPuschTransformPrecodingEnabled.True : RFmx.NRMX.RFmxNRMXPuschTransformPrecodingEnabled.False);
 
                 RFmxOBJ.puschNumberOfRBClusters = 1;
                 RFmxOBJ.puschRBOffset = (Int32)this.numRBOffset.Value;
@@ -197,13 +209,15 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
                 RFmxOBJ.puschModulationType = (RFmx.NRMX.RFmxNRMXPuschModulationType)this.cboPUSCHMod.SelectedItem;
                 RFmxOBJ.puschSlotAllocation = "0-Last";
                 RFmxOBJ.puschSymbolAllocation = "0-Last";
-                RFmxOBJ.puschDmrsPower = -3;
 
-                RFmxOBJ.puschDmrsConfigurationType = RFmx.NRMX.RFmxNRMXPuschDmrsConfigurationType.Type1;
-                RFmxOBJ.puschDmrsMappingType = RFmx.NRMX.RFmxNRMXPuschMappingType.TypeA;
-                RFmxOBJ.intPuschDmrsTypeAPosition = 2;
-                RFmxOBJ.puschDmrsDuration = RFmx.NRMX.RFmxNRMXPuschDmrsDuration.SingleSymbol;
-                //RFmxOBJ.puschDmrsAdditionalPositions = RFmx.NRMX.RFmxNRMXPuschDmrsAdditionalPositions.AdditionalPositions0;
+                RFmxOBJ.puschDmrsPowerMode = (RFmx.NRMX.RFmxNRMXPuschDmrsPowerMode)this.cboDmrsPowerMode.SelectedItem;
+                RFmxOBJ.puschDmrsNumCdmGroups = (Int32)this.numCdmGroups.Value;
+                RFmxOBJ.puschDmrsPower = (double)this.numDmrsPower.Value;
+                RFmxOBJ.puschDmrsConfigurationType = (RFmx.NRMX.RFmxNRMXPuschDmrsConfigurationType)this.cboDmrsConfigType.SelectedItem;
+                RFmxOBJ.puschDmrsMappingType = (RFmx.NRMX.RFmxNRMXPuschMappingType)this.cboDmrsMappingType.SelectedItem;
+                RFmxOBJ.puschDmrsTypeAPosition = (Int32)this.numDmrsPosition.Value;
+                RFmxOBJ.puschDmrsDuration = (RFmx.NRMX.RFmxNRMXPuschDmrsDuration)this.cboDmrsDuration.SelectedItem;
+                RFmxOBJ.puschDmrsAdditionalPositions = (Int32)this.numDmrsAdditionalPosition.Value;
 
                 RFmxOBJ.averagingEnabled = RFmx.NRMX.RFmxNRMXModAccAveragingEnabled.False;
                 RFmxOBJ.averagingCount = 10;

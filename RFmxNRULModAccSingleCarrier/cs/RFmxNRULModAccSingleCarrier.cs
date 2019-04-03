@@ -65,22 +65,24 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
         public string puschSlotAllocation;
         public string puschSymbolAllocation;
 
-        public int puschDmrsPower;
-        public RFmxNRMXPuschDmrsConfigurationType puschDmrsConfigurationType;
-        public RFmxNRMXPuschMappingType puschDmrsMappingType;
-        public int intPuschDmrsTypeAPosition = 2;
-        public RFmxNRMXPuschDmrsDuration puschDmrsDuration;
-        //public RFmxNRMXPuschDmrsAdditionalPositions puschDmrsAdditionalPositions;
+        public RFmxNRMXPuschDmrsPowerMode puschDmrsPowerMode = RFmxNRMXPuschDmrsPowerMode.CdmGroups;
+        public int puschDmrsNumCdmGroups = 1;
+        public double puschDmrsPower = 0;
+        public RFmxNRMXPuschDmrsConfigurationType puschDmrsConfigurationType = RFmxNRMXPuschDmrsConfigurationType.Type1;
+        public RFmxNRMXPuschMappingType puschDmrsMappingType = RFmxNRMXPuschMappingType.TypeA;
+        public int puschDmrsTypeAPosition = 2;
+        public RFmxNRMXPuschDmrsDuration puschDmrsDuration = RFmxNRMXPuschDmrsDuration.SingleSymbol;
+        public int puschDmrsAdditionalPositions = 0;
 
         public RFmxNRMXModAccAveragingEnabled averagingEnabled;
         public int averagingCount;
 
-        public RFmxNRMXModAccMeasurementLengthUnit measurementLengthUnit;
+        public RFmxNRMXModAccMeasurementLengthUnit measurementLengthUnit = RFmxNRMXModAccMeasurementLengthUnit.Slot;
         public int measurementOffset;
         public int measurementLength;
 
-        public RFmxNRMXModAccEvmUnit evmUnit;
-        public RFmxNRMXLinkDirection lnkDirection;
+        public RFmxNRMXModAccEvmUnit evmUnit = RFmxNRMXModAccEvmUnit.Percentage;
+        public RFmxNRMXLinkDirection lnkDirection = RFmxNRMXLinkDirection.Uplink;
         public double timeout;                                                            /* (s) */
         public int peakCompositeEvmSubcarrierIndex;
         public int peakCompositeEvmSymbolIndex;
@@ -280,50 +282,135 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
             NR.ModAcc.Configuration.SetMeasurementEnabled("", true);
             NR.ModAcc.Configuration.SetAveragingEnabled("", averagingEnabled);
             NR.ModAcc.Configuration.SetAveragingCount("", averagingCount);
+            //
+            NR.SetBand("", band);
+            // Signal COnfiguration
+            NR.SetLinkDirection("", lnkDirection);
+            // Carrier Definition
+            NR.ComponentCarrier.SetNumberOfComponentCarriers("", 1);
 
-            NR.SetLinkDirection("", RFmxNRMXLinkDirection.Uplink);
+
+
+#if false
+            //***************************************************************
+            //-------------DEVELOPMENT OF MULTI_CARRIER----------------------
+            //***************************************************************
+
+            // 2-CC
+            // Carrier Definition
+            string[] arrCC = new string[2];
+            NR.ComponentCarrier.SetNumberOfComponentCarriers("", 2);
+
+            for (int i = 0; i < arrCC.Length; i++)
+            {
+                arrCC[i] = RFmxNRMX.BuildCarrierString("", i);
+
+                NR.ComponentCarrier.SetCellID(arrCC[i], cellID);
+                NR.ComponentCarrier.SetBandwidth(arrCC[i], componentCarrierBandwidth);
+                NR.ComponentCarrier.SetNumberOfBandwidthParts(arrCC[i], 1);
+                NR.ComponentCarrier.SetBandwidthPartSubcarrierSpacing(arrCC[i], subcarrierSpacing);
+                NR.SetAutoResourceBlockDetectionEnabled(arrCC[i], RFmxNRMXAutoResourceBlockDetectionEnabled.False);
+                NR.ComponentCarrier.SetPuschResourceBlockOffset(arrCC[i], puschRBOffset);
+                NR.ComponentCarrier.SetPuschNumberOfResourceBlocks(arrCC[i], puschNumberOfRBs);
+            }
+
+            //***************************************************************
+#endif
+
+
+            NR.ComponentCarrier.SetCellID("", cellID);
+            NR.ComponentCarrier.SetBandwidth("", componentCarrierBandwidth);
+            // BWP Setup
+            NR.ComponentCarrier.SetNumberOfBandwidthParts("", 1);
+            NR.ComponentCarrier.SetBandwidthPartSubcarrierSpacing("", subcarrierSpacing);
+            NR.SetAutoResourceBlockDetectionEnabled("", RFmxNRMXAutoResourceBlockDetectionEnabled.False);
+            NR.ComponentCarrier.SetPuschResourceBlockOffset("", puschRBOffset);
+            NR.ComponentCarrier.SetPuschNumberOfResourceBlocks("", puschNumberOfRBs);
+            // PUSCH Setup
+            NR.ComponentCarrier.SetNumberOfPuschConfigurations("", 1);
+            NR.ComponentCarrier.SetPuschSymbolAllocation("", puschSymbolAllocation);
+            NR.ComponentCarrier.SetPuschSlotAllocation("", puschSlotAllocation);
+            NR.ComponentCarrier.SetPuschNumberOfResourceBlockClusters("", puschNumberOfRBClusters);
             
-			NR.ComponentCarrier.SetBandwidth("", componentCarrierBandwidth);
             //int maxRBs = 0, offsetRBs = 0;
             //NR.ComponentCarrier.GetPuschResourceBlockOffset("", out offsetRBs);
             //NR.ComponentCarrier.GetPuschNumberOfResourceBlocks("", out maxRBs);
-            NR.ComponentCarrier.SetCellID("", cellID);
-            NR.SetBand("", band);
-            NR.ComponentCarrier.SetBandwidthPartSubcarrierSpacing("", subcarrierSpacing);
 
-            NR.SetAutoResourceBlockDetectionEnabled("", RFmxNRMXAutoResourceBlockDetectionEnabled.False);
-
-            NR.ComponentCarrier.SetPuschNumberOfResourceBlockClusters("", puschNumberOfRBClusters);
-            NR.ComponentCarrier.SetPuschModulationType("", puschModulationType);
+            // PUSCH Allocations
             //NR.ComponentCarrier.SetResourceBlockAlignmentMode("", RFmxNRMXResourceBlockAlignmentMode.Disabled);
-            for (int i = 0; i < NumberOfSubblocks; i++)
+            //for (int i = 0; i < NumberOfSubblocks; i++)
+            //{
+            //    subblockString = RFmxNRMX.BuildSubblockString("", 0);
+            //    carrierString = RFmxNRMX.BuildCarrierString(subblockString, 0);
+            //    puschClusterString = RFmxNRMX.BuildPuschClusterString(carrierString, i);
+            //    NR.ComponentCarrier.SetPuschResourceBlockOffset(puschClusterString, puschRBOffset);
+            //    NR.ComponentCarrier.SetPuschNumberOfResourceBlocks(puschClusterString, puschNumberOfRBs);
+            //}
+
+            NR.ComponentCarrier.SetPuschModulationType("", puschModulationType);
+            NR.ComponentCarrier.SetPuschTransformPrecodingEnabled("", puschTransformPrecodingEnabled);
+            // Missing DataScramblingIDMode Methods
+            NR.ComponentCarrier.SetPuschDmrsScramblingIDMode("", RFmxNRMXPuschDmrsScramblingIDMode.CellID);
+            NR.ComponentCarrier.SetPuschDmrsScramblingID("", 0);
+
+            NR.ComponentCarrier.SetPuschMappingType("", puschDmrsMappingType);
+            // PUSCH DM-RS
+            NR.ComponentCarrier.SetPuschDmrsScramblingIDMode("", RFmxNRMXPuschDmrsScramblingIDMode.CellID);
+            NR.ComponentCarrier.SetPuschDmrsScramblingID("", 0);
+            // PUSCH---DMRS
+
+            //I would like to add the following DMRS settings to the user configured EVM measurement:
+            //DMRS Config type,
+            //DMRS Mapping type,
+            //DMRS Type A Position,
+            //DMRS Duration,
+            //DMRS Additional Positions,
+            //Number of CDM Groups
+            //*** DMRS Power only available if CP-OFDM
+
+            NR.ComponentCarrier.SetPuschDmrsPowerMode("", puschDmrsPowerMode);
+            if (puschDmrsPowerMode == RFmxNRMXPuschDmrsPowerMode.CdmGroups)
             {
-                subblockString = RFmxNRMX.BuildSubblockString("", 0);
-                carrierString = RFmxNRMX.BuildCarrierString(subblockString, 0);
-                puschClusterString = RFmxNRMX.BuildPuschClusterString(carrierString, i);
-                NR.ComponentCarrier.SetPuschResourceBlockOffset(puschClusterString, puschRBOffset);
-                NR.ComponentCarrier.SetPuschNumberOfResourceBlocks(puschClusterString, puschNumberOfRBs);
+                NR.ComponentCarrier.SetPuschDmrsPower("", 0);
+                NR.ComponentCarrier.SetPuschDmrsConfigurationType("", RFmxNRMXPuschDmrsConfigurationType.Type1);
+            }
+            else
+                NR.ComponentCarrier.SetPuschDmrsPower("", puschDmrsPower);
+
+            if (puschTransformPrecodingEnabled == RFmxNRMXPuschTransformPrecodingEnabled.False)
+                NR.ComponentCarrier.SetPuschDmrsConfigurationType("", puschDmrsConfigurationType);
+
+
+            NR.ComponentCarrier.SetPuschDmrsDuration("", puschDmrsDuration);
+            NR.ComponentCarrier.SetPuschDmrsTypeAPosition("", puschDmrsTypeAPosition);
+            NR.ComponentCarrier.SetPuschDmrsAdditionalPositions("", puschDmrsAdditionalPositions);
+
+            NR.ComponentCarrier.SetPuschMappingType("", puschDmrsMappingType);
+
+            if (puschTransformPrecodingEnabled == RFmxNRMXPuschTransformPrecodingEnabled.True)
+                NR.ComponentCarrier.SetPuschDmrsNumberOfCdmGroups("", 2);
+            else
+            {
+                if (puschDmrsConfigurationType == RFmxNRMXPuschDmrsConfigurationType.Type1)
+                    NR.ComponentCarrier.SetPuschDmrsNumberOfCdmGroups("", MathHelper.Clamp<int>(puschDmrsNumCdmGroups, 1, 2));
+                else
+                    NR.ComponentCarrier.SetPuschDmrsNumberOfCdmGroups("", MathHelper.Clamp<int>(puschDmrsNumCdmGroups, 1, 3));
             }
 
-            NR.ComponentCarrier.SetPuschSlotAllocation("", puschSlotAllocation);
-            NR.ComponentCarrier.SetPuschSymbolAllocation("", puschSymbolAllocation);
-            NR.ComponentCarrier.SetPuschTransformPrecodingEnabled("", puschTransformPrecodingEnabled);
-            NR.ComponentCarrier.SetPuschMappingType("", puschDmrsMappingType);
-            //NR.ComponentCarrier.SetPssPower.puschDmrsPower();
-            NR.ComponentCarrier.SetPuschDmrsScramblingID("", 0);
-            NR.ComponentCarrier.SetPuschDmrsScramblingIDMode("", RFmxNRMXPuschDmrsScramblingIDMode.CellID);
+            // Why String???
+            NR.ComponentCarrier.SetPuschDmrsAntennaPorts("", 0.ToString());
 
-            NR.ComponentCarrier.SetPuschDmrsPuschID("", 0);
+            if (puschTransformPrecodingEnabled == RFmxNRMXPuschTransformPrecodingEnabled.True)
+            {
+                NR.ComponentCarrier.SetPuschDmrsScramblingIDMode("", RFmxNRMXPuschDmrsScramblingIDMode.CellID);
+                NR.ComponentCarrier.SetPuschDmrsScramblingID("", 0);
+                NR.ComponentCarrier.SetPdschDmrsnScid("", 0);
+            }
+
             NR.ComponentCarrier.SetPuschDmrsPuschIDMode("", RFmxNRMXPuschDmrsPuschIDMode.CellID);
-
-            NR.ComponentCarrier.SetPuschDmrsPower("", puschDmrsPower);
-            NR.ComponentCarrier.SetPuschDmrsConfigurationType("", puschDmrsConfigurationType);
-            NR.ComponentCarrier.SetPuschDmrsTypeAPosition("", intPuschDmrsTypeAPosition);
-            NR.ComponentCarrier.SetPuschDmrsDuration("", puschDmrsDuration);
-            NR.ComponentCarrier.SetPuschDmrsAdditionalPositions("", 0);
+            NR.ComponentCarrier.SetPuschDmrsPuschID("", 0);
 
             //NR.ModAcc.Configuration.SetFftWindowLength("", 10e-3);
-
             if (this.duplexScheme == frmRFmxSettings.RFmxDuplexMode.TDD)
             {
                 NR.ModAcc.Configuration.SetMeasurementLengthUnit("", RFmxNRMXModAccMeasurementLengthUnit.Time);
@@ -393,7 +480,7 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
                 arrMag[i] = IQmag;
                 if (IQmag > 1.0)
                 {
-                    Console.WriteLine("IQmag = " + IQmag.ToString() + "\nArrayElement = " + i.ToString());
+                    //Console.WriteLine("IQmag = " + IQmag.ToString() + "\nArrayElement = " + i.ToString());
                     if (IQmag > IQmax) IQmax = IQmag;
                 }
             }
@@ -465,4 +552,21 @@ namespace NationalInstruments.Examples.RFmxNRULModAccSingleCarrier
         public double iqPk2Mean_Meas;
     }
 
+    public class MathHelper
+    {
+        public static T Clamp<T>(T value, T min, T max) where T : IComparable
+        {
+            // todo - implementation
+            T output = value;
+            if (value.CompareTo(max) > 0)
+            {
+                return max;
+            }
+            if (value.CompareTo(min) < 0)
+            {
+                return min;
+            }
+            return output;
+        }
+    }
 }
